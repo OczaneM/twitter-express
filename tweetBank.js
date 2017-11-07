@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 var data = [
-{name: "John", content: "Hi this is a tweet"}, 
+{name: "John", content: "Hi this is a tweet"},
 {name: "Emily", content: "This is another tweet"},
 {name: "Sara", content: "and another tweet"}
 ];
@@ -45,4 +45,4 @@ module.exports = { add: add, list: list, find: find };
 // }
 
 add("Nancy", "Hello");
-console.log(list());
+console.log(find({name: "Mell"}));
