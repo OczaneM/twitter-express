@@ -27,3 +27,5 @@ app.get('/news', function (req, res, next) {
 app.listen(3000, function() {
 	console.log('Server listening');
 });
+
+//Oczane was here!
