@@ -12,3 +12,15 @@ content TEXT DEFAULT NULL
 
 SELECT *
 FROM users;
+
+SELECT content
+FROM tweets
+JOIN users
+ON users.id=tweets.user_id
+WHERE users.name=$1, [req.params.id]
+
+SELECT *
+FROM tweets
+JOIN users
+ON users.id=tweets.user_id
+WHERE tweets.id=$1, [req.params.id]
