@@ -1,17 +1,55 @@
-const express = require('express');
-const router = express.Router();
-// could use one line instead: const router = require('express').Router();
-const tweetBank = require('../tweetBank');
+'use strict';
+var express = require('express');
+var router = express.Router();
+var tweetBank = require('../tweetBank');
 
-router.use(express.static('public'));
+module.exports = function makeRouterWithSockets (io) {
 
-router.get('/', function (req, res) {
-  let tweets = tweetBank.list();
-  res.render( 'index', { tweets: tweets } );
-});
+  // a reusable function
+  function respondWithAllTweets (req, res, next){
+    var allTheTweets = tweetBank.list();
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: allTheTweets,
+      showForm: true
+    });
+  }
 
-// router.get("/stylesheets/style.css", function(req, res, next){
-//   res.sendFile("/home/oczane/Documents/Grace-Hopper/Junior/twitter-express/public/stylesheets/style.css");
-// })
+  // here we basically treet the root view and tweets view as identical
+  router.get('/', respondWithAllTweets);
+  router.get('/tweets', respondWithAllTweets);
 
-module.exports = router;
+  // single-user page
+  router.get('/users/:username', function(req, res, next){
+    var tweetsForName = tweetBank.find({ name: req.params.username });
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: tweetsForName,
+      showForm: true,
+      username: req.params.username
+    });
+  });
+
+  // single-tweet page
+  router.get('/tweets/:id', function(req, res, next){
+    var tweetsWithThatId = tweetBank.find({ id: Number(req.params.id) });
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: tweetsWithThatId // an array of only one element ;-)
+    });
+  });
+
+  // create a new tweet
+  router.post('/tweets', function(req, res, next){
+    var newTweet = tweetBank.add(req.body.name, req.body.content);
+    io.sockets.emit('new_tweet', newTweet);
+    res.redirect('/');
+  });
+
+  // // replaced this hard-coded route with general static routing in app.js
+  // router.get('/stylesheets/style.css', function(req, res, next){
+  //   res.sendFile('/stylesheets/style.css', { root: __dirname + '/../public/' });
+  // });
+
+  return router;
+}
