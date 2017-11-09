@@ -2,22 +2,37 @@
 var express = require('express');
 var router = express.Router();
 var tweetBank = require('../tweetBank');
+var client = require('../db/index.js');
 
 module.exports = function makeRouterWithSockets (io) {
 
-  // a reusable function
-  function respondWithAllTweets (req, res, next){
-    var allTheTweets = tweetBank.list();
-    res.render('index', {
-      title: 'Twitter.js',
-      tweets: allTheTweets,
-      showForm: true
-    });
-  }
+
+  //a reusable function
+  // function respondWithAllTweets (req, res, next){
+  //   var allTheTweets = tweetBank.list();
+  //   res.render('index', {
+  //     title: 'Twitter.js',
+  //     tweets: allTheTweets,
+  //     showForm: true
+  //   });
+  // }
 
   // here we basically treet the root view and tweets view as identical
-  router.get('/', respondWithAllTweets);
-  router.get('/tweets', respondWithAllTweets);
+  router.get('/', function(req, res, next){
+    client.query('SELECT * FROM tweets', function (err, result) {
+    if (err) return next(err); // pass errors to Express
+    var tweets = result.rows;
+    res.render('index', { title: 'Twitter.js', tweets: tweets, showForm: true });
+    });
+  });
+  
+  router.get('/tweets', function(req, res, next){
+    client.query('SELECT * FROM tweets', function (err, result) {
+    if (err) return next(err); // pass errors to Express
+    var tweets = result.rows;
+    res.render('index', { title: 'Twitter.js', tweets: tweets, showForm: true });
+    });
+  });
 
   // single-user page
   router.get('/users/:username', function(req, res, next){
@@ -46,10 +61,12 @@ module.exports = function makeRouterWithSockets (io) {
     res.redirect('/');
   });
 
-  // // replaced this hard-coded route with general static routing in app.js
-  // router.get('/stylesheets/style.css', function(req, res, next){
-  //   res.sendFile('/stylesheets/style.css', { root: __dirname + '/../public/' });
-  // });
+  // replaced this hard-coded route with general static routing in app.js
+  router.get('/stylesheets/style.css', function(req, res, next){
+    res.sendFile('/stylesheets/style.css', { root: __dirname + '/../public/' });
+  });
+
+
 
   return router;
 }

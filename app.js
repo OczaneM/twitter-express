@@ -24,7 +24,7 @@ app.use(bodyParser.json()); // would be for AJAX requests
 
 
 // start the server
-var server = app.listen(5432, function(){
+var server = app.listen(1337, function(){
   console.log('listening on port 1337');
 });
 var io = socketio.listen(server);
